@@ -1,0 +1,25 @@
+name: self-review-check
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+jobs:
+  self-review-check:
+    name: self-review-check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check self-review confirmation
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          echo "Checking PR body for self-review confirmation..."
+          # Check that the PR body contains a checked self-review checkbox
+          if echo "$PR_BODY" | grep -qiE '^\s*-\s*\[x\]\s*.*(self.?review|reviewed my own|i have reviewed)'; then
+            echo "Self-review confirmed."
+          else
+            echo "ERROR: Self-review not confirmed."
+            echo "Please add a checked checkbox in your PR description to confirm you have reviewed your own changes."
+            echo "Example:  - [x] I have self-reviewed my own code"
+            exit 1
+          fi
